@@ -1,4 +1,5 @@
 from scipy.stats import binomtest
+from num2words import num2words
 import pandas as pd
 
 class fam450ss:
@@ -41,7 +42,8 @@ class fam450ss:
         self.ovr = ovr
     
     def allowed_deviations(self, alt):
-        """Calculate the allowed number of deviations for the given alternative hypothesis.
+        """Calculate the allowed number of deviations for the given alternative 
+        hypothesis.
         
         Args:
             alt (str): Alternative hypothesis ('less' or 'greater')
@@ -54,6 +56,8 @@ class fam450ss:
             int: Allowed number of deviations.
         
         Raises:
+            ValueError: If the sample size is not large enough to reject the null 
+            hypothesis.
             ValueError: If the alternative hypothesis is not 'less' or 'greater'.
         
         Example:
@@ -66,16 +70,54 @@ class fam450ss:
         k = 0
         
         if alt == 'less':
-            while not (binomtest(k = k, n = self.n, p = self.trd, alternative = alt).pvalue < self.ovr and binomtest(k = k + 1, n = self.n, p = self.trd, alternative = alt).pvalue >= self.ovr):
+            while not (
+                binomtest(
+                    k = k,
+                    n = self.n,
+                    p = self.trd,
+                    alternative = alt
+                ).pvalue < self.ovr
+                and binomtest(
+                    k = k + 1,
+                    n = self.n,
+                    p = self.trd,
+                    alternative = alt)
+                .pvalue >= self.ovr
+            ):
                 k = k + 1
+                if k > self.n:
+                    raise ValueError(
+                        f"The sample size of {self.n} isn't large enough to reject "
+                        f"the null hypothesis that tolerable rate of deviation is "
+                        f"greater than {self.trd:.0%}."
+                    )
             
             self.alt = alt
             self.k = k
             
             return k
         elif alt == 'greater':
-            while not (binomtest(k = k, n = self.n, p = self.trd, alternative = alt).pvalue >= self.ovr and binomtest(k = k + 1, n = self.n, p = self.trd, alternative = alt).pvalue < self.ovr):
+            while not (
+                binomtest(
+                    k = k,
+                    n = self.n,
+                    p = self.trd,
+                    alternative = alt
+                ).pvalue >= self.ovr 
+                and binomtest(
+                    k = k + 1,
+                    n = self.n,
+                    p = self.trd,
+                    alternative = alt
+                    ).pvalue < self.ovr
+            ):
                 k = k + 1
+                if k > self.n:
+                    raise ValueError(
+                        f"The sample size of {self.n} isn't large enough to reject "
+                        f"the null hypothesis that tolerable rate of deviation is "
+                        f"less than {self.trd:.0%}."
+                    )
             
             self.alt = alt
             self.k = k
@@ -105,25 +147,67 @@ class fam450ss:
             4
             >>> x.detailed_results()
             Null Hypothesis: The true tolerable rate of deviation is 5% or more.
-            Alternative Hypothesis: The true tolerable rate of deviation is less than 5%.
+            Alternative Hypothesis: The true tolerable rate of deviation is less than 
+            5%.
 
-            If the experimenter observes 4 deviations or less in a sample size of 158 (2.53%), they can reject with 90% confidence the null hypothesis that the true tolerable rate of deviation is 5% or more in favor of the alternative that it's less than 5%.  If the experimenter observes more than 4 deviations, they fail to reject the null hypothesis, but cannot say the true tolerable rate of deviation is 5% or more.
+            If the experimenter observes 4 deviations or less in a sample size of 158 
+            (2.53%), they can reject with 90% confidence the null hypothesis that the 
+            true tolerable rate of deviation is 5% or more in favor of the alternative 
+            that it's less than 5%.  If the experimenter observes more than 4 
+            deviations, they fail to reject the null hypothesis, but cannot say the 
+            true tolerable rate of deviation is 5% or more.
             >>> x.allowed_deviations(alt = 'greater')
             11
             >>> x.detailed_results()
             Null Hypothesis: The true tolerable rate of deviation is at most 5%.
-            Alternative Hypothesis: The true tolerable rate of deviation is greater than 5%.
+            Alternative Hypothesis: The true tolerable rate of deviation is greater 
+            than 5%.
 
-            If the experimenter observes more than 11 deviations in a sample size of 158 (6.96%), they can reject with 90% confidence the null hypothesis that the true tolerable rate of deviation is at most 5% in favor of the alternative that it's greater than 5%.  If the experimenter observes 11 or fewer deviations, they fail to reject the null hypothesis, but cannot say the true tolerable rate of deviation is at most 5%.
+            If the experimenter observes more than 11 deviations in a sample size of 
+            158 (6.96%), they can reject with 90% confidence the null hypothesis that 
+            the true tolerable rate of deviation is at most 5% in favor of the 
+            alternative that it's greater than 5%.  If the experimenter observes 11 or 
+            fewer deviations, they fail to reject the null hypothesis, but cannot say 
+            the true tolerable rate of deviation is at most 5%.
         """
         if not hasattr(self, 'alt') or not hasattr(self, 'k'):
-            raise ValueError("You must run allowed_deviations() before detailed_results().")
+            raise ValueError(
+                "You must run allowed_deviations() before detailed_results()."
+            )
         
         if self.alt == 'less':
-            print(f"Null Hypothesis: The true tolerable rate of deviation is {self.trd:.0%} or more.\nAlternative Hypothesis: The true tolerable rate of deviation is less than {self.trd:.0%}.\n\nIf the experimenter observes {self.k:,} deviations or less in a sample size of {self.n:,} ({self.k/self.n:.2%}), they can reject with {1-self.ovr:.0%} confidence the null hypothesis that the true tolerable rate of deviation is {self.trd:.0%} or more in favor of the alternative that it's less than {self.trd:.0%}.  If the experimenter observes more than {self.k:,} deviations, they fail to reject the null hypothesis, but cannot say the true tolerable rate of deviation is {self.trd:.0%} or more.")
+            print(
+                f"Null Hypothesis: The true tolerable rate of deviation is "
+                f"{self.trd:.0%} or more.\n"
+                f"Alternative Hypothesis: The true tolerable rate of deviation "
+                f"is less than {self.trd:.0%}.\n\n"
+                f"If the experimenter observes {self.k:,} deviations or less "
+                f"in a sample size of {self.n:,} ({self.k / self.n:.2%}), "
+                f"they can reject with {1 - self.ovr:.0%} confidence the null "
+                f"hypothesis that the true tolerable rate of deviation is "
+                f"{self.trd:.0%} or more in favor of the alternative that "
+                f"it's less than {self.trd:.0%}. If the experimenter observes "
+                f"more than {self.k:,} deviations, they fail to reject the "
+                f"null hypothesis, but cannot say the true tolerable rate of "
+                f"deviation is {self.trd:.0%} or more."
+            )
         
         if self.alt == 'greater':
-            print(f"Null Hypothesis: The true tolerable rate of deviation is at most {self.trd:.0%}.\nAlternative Hypothesis: The true tolerable rate of deviation is greater than {self.trd:.0%}.\n\nIf the experimenter observes more than {self.k:,} deviations in a sample size of {self.n:,} ({self.k/self.n:.2%}), they can reject with {1-self.ovr:.0%} confidence the null hypothesis that the true tolerable rate of deviation is at most {self.trd:.0%} in favor of the alternative that it's greater than {self.trd:.0%}.  If the experimenter observes {self.k:,} or fewer deviations, they fail to reject the null hypothesis, but cannot say the true tolerable rate of deviation is at most {self.trd:.0%}.")
+            print(
+                f"Null Hypothesis: The true tolerable rate of deviation is at "
+                f"most {self.trd:.0%}.\n"
+                f"Alternative Hypothesis: The true tolerable rate of deviation "
+                f"is greater than {self.trd:.0%}.\n\n"
+                f"If the experimenter observes more than {self.k:,} deviations "
+                f"in a sample size of {self.n:,} ({self.k / self.n:.2%}), "
+                f"they can reject with {1 - self.ovr:.0%} confidence the null "
+                f"hypothesis that the true tolerable rate of deviation is at "
+                f"most {self.trd:.0%} in favor of the alternative that it's "
+                f"greater than {self.trd:.0%}. If the experimenter observes "
+                f"{self.k:,} or fewer deviations, they fail to reject the null "
+                f"hypothesis, but cannot say the true tolerable rate of "
+                f"deviation is at most {self.trd:.0%}."
+            )
     
     def simple_results(self):
         """Print simple results of the allowed deviations calculation.
@@ -141,32 +225,47 @@ class fam450ss:
             ValueError: If allowed_deviations() has not been run yet.
             
         Example:
-            >>> x = fam450(n = 158, trd = 0.05, ovr = 0.1)
+            >>> x = fam450ss(n = 158, trd = 0.05, ovr = 0.1)
             >>> x.allowed_deviations(alt = 'less')
             4
             >>> x.simple_results()
-            4 is the maximum number of allowed deviations that an experimenter has enough evidence to determine the internal controls are effective.
+            Four is the maximum number of allowed deviations that an experimenter has 
+            enough evidence to determine the internal controls are effective.
             
             >>> x.allowed_deviations(alt = 'greater')
             11
             >>> x.simple_results()
-            11 is the minimum number of allowed deviations, after which an experimenter has enough evidence to determine the internal controls are ineffective.
+            Eleven is the minimum number of allowed deviations, after which an 
+            experimenter has enough evidence to determine the internal controls 
+            are ineffective.
         """
         
         if not hasattr(self, 'alt') or not hasattr(self, 'k'):
-            raise ValueError("You must run allowed_deviations() before simple_results().")
+            raise ValueError(
+                "You must run allowed_deviations() before simple_results()."
+            )
         
         if self.alt == 'less':
-            print(f"{self.k:,} is the maximum number of allowed deviations that an experimenter has enough evidence to determine the internal controls are effective.")
+            print(
+                f"{num2words(self.k, lang='en').capitalize()} is the maximum number of "
+                f"allowed deviations that an experimenter has enough evidence to "
+                f"determine the internal controls are effective."
+            )
         
         if self.alt == 'greater':
-            print(f"{self.k:,} is the minimum number of allowed deviations, after which an experimenter has enough evidence to determine the internal controls are ineffective.")
+            print(
+                f"{num2words(self.k, lang='en').capitalize()} is the minimum number of "
+                f"allowed deviations, after which an experimenter has enough evidence "
+                f"to determine the internal controls are ineffective."
+            )
 
 def fam450lt():
-    """Reproduce tables 1 and 2 from FAM 450 for the less than alternative hypothesis.  The overreliance risk is set to 10%.
+    """Reproduce tables 1 and 2 from FAM 450 for the less than alternative hypothesis.  
+    The overreliance risk is set to 10%.
     
     Returns:
-        pd.DataFrame: DataFrame containing allowed deviations for various sample sizes and tolerable rates of deviations.
+        pd.DataFrame: DataFrame containing allowed deviations for various sample sizes 
+        and tolerable rates of deviations.
     """
     x = fam450ss(n = 45, trd = 0.05, ovr = 0.1)
     r11 = x.allowed_deviations(alt = 'less')
@@ -198,18 +297,33 @@ def fam450lt():
     x = fam450ss(n = 158, trd = 0.1, ovr = 0.1)
     r52 = x.allowed_deviations(alt = 'less')
     
-    res = {'45': (r11, r12), '78': (r21, r22), '105': (r31, r32), '132': (r41, r42), '158': (r51, r52)}
-    res = pd.DataFrame.from_dict(res, orient = 'index', columns = ['Tolerable Deviation Rate of 5%', 'Tolerable Deviation Rate of 10%'])
+    res = {
+        '45': (r11, r12),
+        '78': (r21, r22),
+        '105': (r31, r32),
+        '132': (r41, r42),
+        '158': (r51, r52)
+    }
+    res = pd.DataFrame.from_dict(
+        res, 
+        orient = 'index', 
+        columns = [
+            'Tolerable Deviation Rate of 5%', 
+            'Tolerable Deviation Rate of 10%'
+            ]
+    )
     res.index.name = 'Sample Size'
     res.index = res.index.astype(int)
     
     return res
 
 def fam450gt():
-    """Reproduce tables 1 and 2 from FAM 450 for the greater than alternative hypothesis.
+    """Reproduce tables 1 and 2 from FAM 450 for the greater than alternative 
+    hypothesis.
     
     Returns:
-        pd.DataFrame: DataFrame containing allowed deviations for various sample sizes and tolerable rates of deviations.
+        pd.DataFrame: DataFrame containing allowed deviations for various sample sizes 
+        and tolerable rates of deviations.
     """
     x = fam450ss(n = 45, trd = 0.05, ovr = 0.1)
     r11 = x.allowed_deviations(alt = 'greater')
@@ -241,8 +355,20 @@ def fam450gt():
     x = fam450ss(n = 158, trd = 0.1, ovr = 0.1)
     r52 = x.allowed_deviations(alt = 'greater')
     
-    res = {'45': (r11, r12), '78': (r21, r22), '105': (r31, r32), '132': (r41, r42), '158': (r51, r52)}
-    res = pd.DataFrame.from_dict(res, orient = 'index', columns = ['Tolerable Deviation Rate of 5%', 'Tolerable Deviation Rate of 10%'])
+    res = {
+        '45': (r11, r12), 
+        '78': (r21, r22), 
+        '105': (r31, r32), 
+        '132': (r41, r42), 
+        '158': (r51, r52)
+    }
+    res = pd.DataFrame.from_dict(
+        res, 
+        orient = 'index', 
+        columns = [
+            'Tolerable Deviation Rate of 5%', 'Tolerable Deviation Rate of 10%'
+        ]
+    )
     res.index.name = 'Sample Size'
     res.index = res.index.astype(int)
     

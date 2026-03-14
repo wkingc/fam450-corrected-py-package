@@ -95,7 +95,7 @@ audit.allowed_deviations(alt='less')
 # Returns: 4
 
 audit.simple_results()
-# Output: 4 is the maximum number of allowed deviations that an experimenter 
+# Output: Four is the maximum number of allowed deviations that an experimenter 
 # has enough evidence to determine the internal controls are effective.
 
 audit.detailed_results()
@@ -122,6 +122,7 @@ print(ineffectiveness_table)
 - Python ≥ 3.9
 - scipy
 - pandas
+- num2words
 
 ## Development
 
@@ -149,7 +150,7 @@ If you use this package in your work, please consider citing it:
     author = {Wade K. Copeland},
     title = {{fam450: A Python package to calculate the number of allowed deviations for tests of internal control effectiveness or ineffectiveness}},
     url = {https://pypi.org/project/fam450/},
-    version = {0.1.0},
+    version = {0.1.1},
     year = {2026}
 }
 ```

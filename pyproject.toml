@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fam450"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python package to calculate the number of allowed devations for tests of internal control effectiveness or ineffectiveness."
 readme = "README.md"
 license = "MIT"
@@ -32,6 +32,7 @@ classifiers = [
 dependencies = [
     "scipy",
     "pandas",
+    "num2words",
 ]
 requires-python = ">=3.9"
 
