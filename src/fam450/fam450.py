@@ -85,7 +85,7 @@ class fam450ss:
                 .pvalue >= self.ovr
             ):
                 k = k + 1
-                if k > self.n:
+                if k >= self.n:
                     raise ValueError(
                         f"The sample size of {self.n} isn't large enough to reject "
                         f"the null hypothesis that tolerable rate of deviation is "
@@ -112,7 +112,7 @@ class fam450ss:
                     ).pvalue < self.ovr
             ):
                 k = k + 1
-                if k > self.n:
+                if k >= self.n:
                     raise ValueError(
                         f"The sample size of {self.n} isn't large enough to reject "
                         f"the null hypothesis that tolerable rate of deviation is "

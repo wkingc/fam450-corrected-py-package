@@ -20,7 +20,7 @@ def test_fam450ss_allowed_deviations():
     assert x.allowed_deviations(alt = 'less') == 4
     assert x.allowed_deviations(alt = 'greater') == 11
 
-def test_allowed_deviations_raises_error():
+def test_allowed_deviations_less_raises_error():
     x = fam450ss(n=20, trd=0.05, ovr=0.1)
 
     with pytest.raises(ValueError) as exc_info:
@@ -29,6 +29,17 @@ def test_allowed_deviations_raises_error():
     assert str(exc_info.value) == (
             "The sample size of 20 isn't large enough to reject the null hypothesis "
             "that tolerable rate of deviation is greater than 5%."
+        )
+
+def test_allowed_deviations_greater_raises_error():
+    x = fam450ss(n=1, trd=0.10, ovr=0.1)
+
+    with pytest.raises(ValueError) as exc_info:
+        x.allowed_deviations(alt="greater")
+
+    assert str(exc_info.value) == (
+            "The sample size of 1 isn't large enough to reject the null hypothesis "
+            "that tolerable rate of deviation is less than 10%."
         )
 
 def test_fam450ss_detailed_results():
@@ -69,6 +80,7 @@ def test_fam450ss_detailed_results():
         "the null hypothesis, but cannot say the true tolerable rate of "
         "deviation is at most 5%.\n"
     )
+
 def test_fam450ss_simple_results():
     x = fam450ss(n = 158, trd = 0.05, ovr = 0.1)
     

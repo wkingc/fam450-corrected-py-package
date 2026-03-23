@@ -150,7 +150,7 @@ If you use this package in your work, please consider citing it:
     author = {Wade K. Copeland},
     title = {{fam450: A Python package to calculate the number of allowed deviations for tests of internal control effectiveness or ineffectiveness}},
     url = {https://pypi.org/project/fam450/},
-    version = {0.1.1},
+    version = {0.1.2},
     year = {2026}
 }
 ```
